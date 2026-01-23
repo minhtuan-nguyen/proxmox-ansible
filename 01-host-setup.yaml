@@ -2,6 +2,26 @@
 - name: preparation tasks
   hosts: proxmox_nodes
   tasks:
+    - name: set NTP servers
+      ansible.builtin.include_role:
+        name: 02_timezone
+    - name: check if resolv.conf file exists 
+      stat:
+        path: /etc/resolv.conf
+      register: file_info
+    - name: Create /etc/resolv.conf if it exists
+      file:
+        path: /etc/resolv.conf
+        state: touch
+      when: not file_info.stat.exists
+
+    - name: Set DNS nameservers in /etc/resolv.conf
+      blockinfile:
+        path: /etc/resolv.conf
+        block: |
+          search "{{ search_domain }}"
+          nameserver "{{ dns_1 }}"
+          nameserver "{{ dns_2 }}"
     - name: update to latest packages
       ansible.builtin.apt:
         update_cache: true
@@ -164,7 +184,6 @@
         api_token_secret: "{{ token_secret_02 }}"
         api_token_id: "{{ api_token_id }}"
         state: apply
-
 # Node 03 network configuration
 - name: configure network interfaces
   hosts: proxmox-03

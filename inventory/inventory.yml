@@ -13,6 +13,9 @@ token_secret_01=2dde89ad-44d1-4d4d-a12a-3fc5aa14bb24
 token_secret_02=134d691c-f89b-4fd6-b61e-c9d498665229
 token_secret_03=e3139d85-3c92-48fd-aad4-fc7ef2ab4eae
 network_gateway=10.49.172.1
+search_domain=emea.itss.net
+dns_1=10.49.144.3
+dns_2=10.49.146.1
 
 proxmox_01_api=10.49.172.184:8006
 proxmox_01_name=slmitstestsrv01
@@ -28,4 +31,6 @@ proxmox_03_api=10.49.172.186:8006
 proxmox_03_name=slmitstestsrv03
 proxmox_03_vmbr0=10.49.172.186/24
 proxmox_03_vmbr1=172.49.172.186/24
+
+timezone=Europe/Berlin
 
