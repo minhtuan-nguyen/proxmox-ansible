@@ -1,0 +1,5 @@
+all:
+  hosts:
+    proxmox-01:
+      ansible_host: '10.49.172.184'
+      ansible_user: 'root'
