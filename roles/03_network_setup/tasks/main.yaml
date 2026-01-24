@@ -1,0 +1,192 @@
+# Node 01 network configuration
+- name: add bond0 interface
+  community.proxmox.proxmox_node_network:
+    node: "{{ proxmox_01_name }}"
+    api_host: "{{ proxmox_01_api }}"
+    api_user: "{{ api_user }}"
+    api_token_secret: "{{ token_secret_01 }}"
+    api_token_id: "{{ api_token_id }}"
+    state: present
+    iface: bond0
+    iface_type: bond
+    bond_mode: 802.3ad
+    slaves: nic4 nic5
+    bond_xmit_hash_policy: "layer3+4"
+    mtu: 9000
+- name: add bond1 interface
+  community.proxmox.proxmox_node_network:
+    node: "{{ proxmox_01_name }}"
+    api_host: "{{ proxmox_01_api }}"
+    api_user: "{{ api_user }}"
+    api_token_secret: "{{ token_secret_01 }}"
+    api_token_id: "{{ api_token_id }}"
+    state: present
+    iface: bond1
+    iface_type: bond
+    bond_mode: 802.3ad
+    slaves: nic6 nic7
+    bond_xmit_hash_policy: "layer3+4"
+    mtu: 9000
+- name: add vmbr0 interface
+  community.proxmox.proxmox_node_network:
+    node: "{{ proxmox_01_name }}"
+    api_host: "{{ proxmox_01_api }}"
+    api_user: "{{ api_user }}"
+    api_token_secret: "{{ token_secret_01 }}"
+    api_token_id: "{{ api_token_id }}"
+    state: present
+    iface: vmbr0
+    iface_type: bridge
+    bridge_ports: bond0
+    cidr: "{{ proxmox_01_vmbr0 }}"
+    gateway: "{{ network_gateway }}"
+    mtu: 9000
+- name: add vmbr1 interface
+  community.proxmox.proxmox_node_network:
+    node: "{{ proxmox_01_name }}"
+    api_host: "{{ proxmox_01_api }}"
+    api_user: "{{ api_user }}"
+    api_token_secret: "{{ token_secret_01 }}"
+    api_token_id: "{{ api_token_id }}"
+    state: present
+    iface: vmbr1
+    iface_type: bridge
+    bridge_ports: bond1
+    cidr: "{{ proxmox_01_vmbr1 }}"
+    mtu: 9000
+- name: apply network changes
+  community.proxmox.proxmox_node_network:
+   node: "{{ proxmox_01_name }}"
+   api_host: "{{ proxmox_01_api }}"
+   api_user: "{{ api_user }}"
+   api_token_secret: "{{ token_secret_01 }}"
+   api_token_id: "{{ api_token_id }}"
+   state: apply
+# Node 02 network configuration
+- name: add bond0 interface
+  community.proxmox.proxmox_node_network:
+    node: "{{ proxmox_02_name }}"
+    api_host: "{{ proxmox_02_api }}"
+    api_user: "{{ api_user }}"
+    api_token_secret: "{{ token_secret_02 }}"
+    api_token_id: "{{ api_token_id }}"
+    state: present
+    iface: bond0
+    iface_type: bond
+    bond_mode: 802.3ad
+    slaves: nic4 nic5
+    bond_xmit_hash_policy: "layer3+4"
+    mtu: 9000
+- name: add bond1 interface
+  community.proxmox.proxmox_node_network:
+    node: "{{ proxmox_02_name }}"
+    api_host: "{{ proxmox_02_api }}"
+    api_user: "{{ api_user }}"
+    api_token_secret: "{{ token_secret_02 }}"
+    api_token_id: "{{ api_token_id }}"
+    state: present
+    iface: bond1
+    iface_type: bond
+    bond_mode: 802.3ad
+    slaves: nic6 nic7
+    bond_xmit_hash_policy: "layer3+4"
+    mtu: 9000
+- name: add vmbr0 interface
+  community.proxmox.proxmox_node_network:
+    node: "{{ proxmox_02_name }}"
+    api_host: "{{ proxmox_02_api }}"
+    api_user: "{{ api_user }}"
+    api_token_secret: "{{ token_secret_02 }}"
+    api_token_id: "{{ api_token_id }}"
+    state: present
+    iface: vmbr0
+    iface_type: bridge
+    bridge_ports: bond0
+    cidr: "{{ proxmox_02_vmbr0 }}"
+    gateway: "{{ network_gateway }}"
+    mtu: 9000
+- name: add vmbr1 interface
+  community.proxmox.proxmox_node_network:
+    node: "{{ proxmox_02_name }}"
+    api_host: "{{ proxmox_02_api }}"
+    api_user: "{{ api_user }}"
+    api_token_secret: "{{ token_secret_02 }}"
+    api_token_id: "{{ api_token_id }}"
+    state: present
+    iface: vmbr1
+    iface_type: bridge
+    bridge_ports: bond1
+    cidr: "{{ proxmox_02_vmbr1 }}"
+    mtu: 9000
+- name: apply network changes
+  community.proxmox.proxmox_node_network:
+    node: "{{ proxmox_02_name }}"
+    api_host: "{{ proxmox_02_api }}"
+    api_user: "{{ api_user }}"
+    api_token_secret: "{{ token_secret_02 }}"
+    api_token_id: "{{ api_token_id }}"
+    state: apply
+# Node 03 network configuration
+- name: add bond0 interface
+  community.proxmox.proxmox_node_network:
+    node: "{{ proxmox_03_name }}"
+    api_host: "{{ proxmox_03_api }}"
+    api_user: "{{ api_user }}"
+    api_token_secret: "{{ token_secret_03 }}"
+    api_token_id: "{{ api_token_id }}"
+    state: present
+    iface: bond0
+    iface_type: bond
+    bond_mode: 802.3ad
+    slaves: nic4 nic5
+    bond_xmit_hash_policy: "layer3+4"
+    mtu: 9000
+- name: add bond1 interface
+  community.proxmox.proxmox_node_network:
+    node: "{{ proxmox_03_name }}"
+    api_host: "{{ proxmox_03_api }}"
+    api_user: "{{ api_user }}"
+    api_token_secret: "{{ token_secret_03 }}"
+    api_token_id: "{{ api_token_id }}"
+    state: present
+    iface: bond1
+    iface_type: bond
+    bond_mode: 802.3ad
+    slaves: nic6 nic7
+    bond_xmit_hash_policy: "layer3+4"
+    mtu: 9000
+- name: add vmbr0 interface
+  community.proxmox.proxmox_node_network:
+    node: "{{ proxmox_03_name }}"
+    api_host: "{{ proxmox_03_api }}"
+    api_user: "{{ api_user }}"
+    api_token_secret: "{{ token_secret_03 }}"
+    api_token_id: "{{ api_token_id }}"
+    state: present
+    iface: vmbr0
+    iface_type: bridge
+    bridge_ports: bond0
+    cidr: "{{ proxmox_03_vmbr0 }}"
+    gateway: "{{ network_gateway }}"
+    mtu: 9000
+- name: add vmbr1 interface
+  community.proxmox.proxmox_node_network:
+    node: "{{ proxmox_03_name }}"
+    api_host: "{{ proxmox_03_api }}"
+    api_user: "{{ api_user }}"
+    api_token_secret: "{{ token_secret_03 }}"
+    api_token_id: "{{ api_token_id }}"
+    state: present
+    iface: vmbr1
+    iface_type: bridge
+    bridge_ports: bond1
+    cidr: "{{ proxmox_03_vmbr1 }}"
+    mtu: 9000
+- name: apply network changes
+  community.proxmox.proxmox_node_network:
+    node: "{{ proxmox_03_name }}"
+    api_host: "{{ proxmox_03_api }}"
+    api_user: "{{ api_user }}"
+    api_token_secret: "{{ token_secret_03 }}"
+    api_token_id: "{{ api_token_id }}"
+    state: apply

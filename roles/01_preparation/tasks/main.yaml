@@ -1,0 +1,28 @@
+- name: update to latest packages
+  ansible.builtin.apt:
+    update_cache: true
+    upgrade: true
+    cache_valid_time: 86400 # One day
+- name: install necessary packages
+  apt:
+    name: 
+    - sudo
+    - python3-proxmoxer
+    update_cache: yes
+    cache_valid_time: 86400
+    state: latest
+- name: create ansible user
+  user:
+    name: "{{ local_user }}"
+    shell: "/bin/bash"
+- name: add ansible ssh key
+  authorized_key:
+    user: "{{ local_user }}"
+    key: "{{ ssh_key }}"
+- name: add ansible to sudoers
+  copy:
+    src: sudoer_ansible
+    dest: /etc/sudoers.d/ansible
+    owner: root
+    group: root
+    mode: 0440

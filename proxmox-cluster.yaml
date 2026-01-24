@@ -1,0 +1,16 @@
+---
+- name: preparation tasks
+  hosts: proxmox_nodes
+  tasks:
+    - name: prepare servers for next steps
+      ansible.builtin.include_role:
+        name: 01_preparation
+    - name: set NTP servers
+      ansible.builtin.include_role:
+        name: 02_timezone
+    - name: setup network
+      ansible.builtin.include_role:
+        name: 03_network_setup
+        
+
+
