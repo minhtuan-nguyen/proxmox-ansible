@@ -5,32 +5,39 @@ proxmox-02 ansible_host=10.49.172.185
 proxmox-03 ansible_host=10.49.172.186
 [all:vars]
 ansible_user=root
-local_user=ansible
-api_user=ansible@pam
-ssh_key="ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCbj1kF7UkZtHLhz/EoC6tkIT9mhtLCr+eSPLfv6qlkLpPYYB4aqEBzzBWksSqYWqBJymK7EgksAqTwe1/WBilYO8vXdM0JtUsQxCh0wyAQw51YVHrZr8xXAOFjclUXuZtVNidKVoeW+2kfRcjZ2C0JiBs159YY7NMQLU6EHvap1Z8mbM+QOCzjGEG7gf+07GUv3eILMaBabHGnorWhunNhppg8KL7xMdgqbeYiTFjDwBJkC/cIGclnDM2gYXZU03xaYcviuvafFZxVgNtEWFunN3y1IWEg7GQKBDNH+nEyxmzAA29JtWVmGjgsJYUP7Raihb4J7bbGN5i80mW5ZxUGoGN6+6Pj549Wltot6z0MoqNOgpTi6aPCDnlwmYFUMAeqUTuRmZPBBcjPTlX3JP4I1RDUXUAOCWhQb4lsDzv1dPXOZFo0y/Y8zujEc65oe4nrkXA8Et2G7IQH88oSZYTyFAC0waDii4zsDcdipvzVG+X6gxGCZx7xkpswo9d41Nc= g7nguym@SDEG7SLM-006305"
-api_token_id=ansible-token
-token_secret_01=2dde89ad-44d1-4d4d-a12a-3fc5aa14bb24
-token_secret_02=134d691c-f89b-4fd6-b61e-c9d498665229
-token_secret_03=e3139d85-3c92-48fd-aad4-fc7ef2ab4eae
+root_user=root@pam
+root_token_id=root-token
+root_secret_01=604b2f28-8805-4e7f-9e92-aba9bdff65fa
+root_secret_02=757d4e5e-fc35-4e57-9f94-7a30d76d2387
+root_secret_03=51a68dcc-081f-4b6e-ba5f-9be09cd96b66
+
 network_gateway=10.49.172.1
 search_domain=emea.itss.net
 dns_1=10.49.144.3
 dns_2=10.49.146.1
+cluster_name=slmitscluster
+
 
 proxmox_01_api=10.49.172.184:8006
 proxmox_01_name=slmitstestsrv01
 proxmox_01_vmbr0=10.49.172.184/24
 proxmox_01_vmbr1=172.49.172.184/24
+proxmox_01_link0=10.49.172.184
+proxmox_01_link1=172.49.172.184
 
 proxmox_02_api=10.49.172.185:8006
 proxmox_02_name=slmitstestsrv02
 proxmox_02_vmbr0=10.49.172.185/24
 proxmox_02_vmbr1=172.49.172.185/24
+proxmox_02_link0=10.49.172.185
+proxmox_02_link1=172.49.172.185
 
 proxmox_03_api=10.49.172.186:8006
 proxmox_03_name=slmitstestsrv03
 proxmox_03_vmbr0=10.49.172.186/24
 proxmox_03_vmbr1=172.49.172.186/24
+proxmox_03_link0=10.49.172.186
+proxmox_03_link1=172.49.172.186
 
 timezone=Europe/Berlin
 

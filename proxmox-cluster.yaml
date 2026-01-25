@@ -11,6 +11,11 @@
     - name: setup network
       ansible.builtin.include_role:
         name: 03_network_setup
-        
-
+    
+- name: cluster setup
+  hosts: proxmox-01
+  tasks:
+    - name: create cluster
+      ansible.builtin.include_role:
+        name: 04_cluster
 

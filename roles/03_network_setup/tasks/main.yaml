@@ -3,9 +3,9 @@
   community.proxmox.proxmox_node_network:
     node: "{{ proxmox_01_name }}"
     api_host: "{{ proxmox_01_api }}"
-    api_user: "{{ api_user }}"
-    api_token_secret: "{{ token_secret_01 }}"
-    api_token_id: "{{ api_token_id }}"
+    api_user: "{{ root_user }}"
+    api_token_secret: "{{ root_secret_01 }}"
+    api_token_id: "{{ root_token_id }}"
     state: present
     iface: bond0
     iface_type: bond
@@ -17,9 +17,9 @@
   community.proxmox.proxmox_node_network:
     node: "{{ proxmox_01_name }}"
     api_host: "{{ proxmox_01_api }}"
-    api_user: "{{ api_user }}"
-    api_token_secret: "{{ token_secret_01 }}"
-    api_token_id: "{{ api_token_id }}"
+    api_user: "{{ root_user }}"
+    api_token_secret: "{{ root_secret_01 }}"
+    api_token_id: "{{ root_token_id }}"
     state: present
     iface: bond1
     iface_type: bond
@@ -31,9 +31,9 @@
   community.proxmox.proxmox_node_network:
     node: "{{ proxmox_01_name }}"
     api_host: "{{ proxmox_01_api }}"
-    api_user: "{{ api_user }}"
-    api_token_secret: "{{ token_secret_01 }}"
-    api_token_id: "{{ api_token_id }}"
+    api_user: "{{ root_user }}"
+    api_token_secret: "{{ root_secret_01 }}"
+    api_token_id: "{{ root_token_id }}"
     state: present
     iface: vmbr0
     iface_type: bridge
@@ -45,9 +45,9 @@
   community.proxmox.proxmox_node_network:
     node: "{{ proxmox_01_name }}"
     api_host: "{{ proxmox_01_api }}"
-    api_user: "{{ api_user }}"
-    api_token_secret: "{{ token_secret_01 }}"
-    api_token_id: "{{ api_token_id }}"
+    api_user: "{{ root_user }}"
+    api_token_secret: "{{ root_secret_01 }}"
+    api_token_id: "{{ root_token_id }}"
     state: present
     iface: vmbr1
     iface_type: bridge
@@ -58,18 +58,18 @@
   community.proxmox.proxmox_node_network:
    node: "{{ proxmox_01_name }}"
    api_host: "{{ proxmox_01_api }}"
-   api_user: "{{ api_user }}"
-   api_token_secret: "{{ token_secret_01 }}"
-   api_token_id: "{{ api_token_id }}"
+   api_user: "{{ root_user }}"
+   api_token_secret: "{{ root_secret_01 }}"
+   api_token_id: "{{ root_token_id }}"
    state: apply
 # Node 02 network configuration
 - name: add bond0 interface
   community.proxmox.proxmox_node_network:
     node: "{{ proxmox_02_name }}"
     api_host: "{{ proxmox_02_api }}"
-    api_user: "{{ api_user }}"
-    api_token_secret: "{{ token_secret_02 }}"
-    api_token_id: "{{ api_token_id }}"
+    api_user: "{{ root_user }}"
+    api_token_secret: "{{ root_secret_02 }}"
+    api_token_id: "{{ root_token_id }}"
     state: present
     iface: bond0
     iface_type: bond
@@ -81,9 +81,9 @@
   community.proxmox.proxmox_node_network:
     node: "{{ proxmox_02_name }}"
     api_host: "{{ proxmox_02_api }}"
-    api_user: "{{ api_user }}"
-    api_token_secret: "{{ token_secret_02 }}"
-    api_token_id: "{{ api_token_id }}"
+    api_user: "{{ root_user }}"
+    api_token_secret: "{{ root_secret_02 }}"
+    api_token_id: "{{ root_token_id }}"
     state: present
     iface: bond1
     iface_type: bond
@@ -95,9 +95,9 @@
   community.proxmox.proxmox_node_network:
     node: "{{ proxmox_02_name }}"
     api_host: "{{ proxmox_02_api }}"
-    api_user: "{{ api_user }}"
-    api_token_secret: "{{ token_secret_02 }}"
-    api_token_id: "{{ api_token_id }}"
+    api_user: "{{ root_user }}"
+    api_token_secret: "{{ root_secret_02 }}"
+    api_token_id: "{{ root_token_id }}"
     state: present
     iface: vmbr0
     iface_type: bridge
@@ -109,9 +109,9 @@
   community.proxmox.proxmox_node_network:
     node: "{{ proxmox_02_name }}"
     api_host: "{{ proxmox_02_api }}"
-    api_user: "{{ api_user }}"
-    api_token_secret: "{{ token_secret_02 }}"
-    api_token_id: "{{ api_token_id }}"
+    api_user: "{{ root_user }}"
+    api_token_secret: "{{ root_secret_02 }}"
+    api_token_id: "{{ root_token_id }}"
     state: present
     iface: vmbr1
     iface_type: bridge
@@ -122,18 +122,18 @@
   community.proxmox.proxmox_node_network:
     node: "{{ proxmox_02_name }}"
     api_host: "{{ proxmox_02_api }}"
-    api_user: "{{ api_user }}"
-    api_token_secret: "{{ token_secret_02 }}"
-    api_token_id: "{{ api_token_id }}"
+    api_user: "{{ root_user }}"
+    api_token_secret: "{{ root_secret_02 }}"
+    api_token_id: "{{ root_token_id }}"
     state: apply
 # Node 03 network configuration
 - name: add bond0 interface
   community.proxmox.proxmox_node_network:
     node: "{{ proxmox_03_name }}"
     api_host: "{{ proxmox_03_api }}"
-    api_user: "{{ api_user }}"
-    api_token_secret: "{{ token_secret_03 }}"
-    api_token_id: "{{ api_token_id }}"
+    api_user: "{{ root_user }}"
+    api_token_secret: "{{ root_secret_03 }}"
+    api_token_id: "{{ root_token_id }}"
     state: present
     iface: bond0
     iface_type: bond
@@ -145,9 +145,9 @@
   community.proxmox.proxmox_node_network:
     node: "{{ proxmox_03_name }}"
     api_host: "{{ proxmox_03_api }}"
-    api_user: "{{ api_user }}"
-    api_token_secret: "{{ token_secret_03 }}"
-    api_token_id: "{{ api_token_id }}"
+    api_user: "{{ root_user }}"
+    api_token_secret: "{{ root_secret_03 }}"
+    api_token_id: "{{ root_token_id }}"
     state: present
     iface: bond1
     iface_type: bond
@@ -159,9 +159,9 @@
   community.proxmox.proxmox_node_network:
     node: "{{ proxmox_03_name }}"
     api_host: "{{ proxmox_03_api }}"
-    api_user: "{{ api_user }}"
-    api_token_secret: "{{ token_secret_03 }}"
-    api_token_id: "{{ api_token_id }}"
+    api_user: "{{ root_user }}"
+    api_token_secret: "{{ root_secret_03 }}"
+    api_token_id: "{{ root_token_id }}"
     state: present
     iface: vmbr0
     iface_type: bridge
@@ -173,9 +173,9 @@
   community.proxmox.proxmox_node_network:
     node: "{{ proxmox_03_name }}"
     api_host: "{{ proxmox_03_api }}"
-    api_user: "{{ api_user }}"
-    api_token_secret: "{{ token_secret_03 }}"
-    api_token_id: "{{ api_token_id }}"
+    api_user: "{{ root_user }}"
+    api_token_secret: "{{ root_secret_03 }}"
+    api_token_id: "{{ root_token_id }}"
     state: present
     iface: vmbr1
     iface_type: bridge
@@ -186,7 +186,7 @@
   community.proxmox.proxmox_node_network:
     node: "{{ proxmox_03_name }}"
     api_host: "{{ proxmox_03_api }}"
-    api_user: "{{ api_user }}"
-    api_token_secret: "{{ token_secret_03 }}"
-    api_token_id: "{{ api_token_id }}"
+    api_user: "{{ root_user }}"
+    api_token_secret: "{{ root_secret_03 }}"
+    api_token_id: "{{ root_token_id }}"
     state: apply
