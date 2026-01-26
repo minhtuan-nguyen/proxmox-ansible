@@ -11,7 +11,7 @@
     - name: setup network
       ansible.builtin.include_role:
         name: 03_network_setup
-    
+# Above steps won't work if running again after the nodes are in cluster    
 - name: cluster setup
   hosts: proxmox-01
   tasks:
