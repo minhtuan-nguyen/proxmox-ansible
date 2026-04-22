@@ -1,9 +1,17 @@
-[proxmox_nodes]
+[linstor_controllers]
 proxmox-01 ansible_host=10.49.172.184  
 proxmox-02 ansible_host=10.49.172.185
+
+[linstor_backup]
 proxmox-03 ansible_host=10.49.172.186
+
+[proxmox_nodes:children]
+linstor_controllers
+linstor_backup
+
 [all:vars]
 ansible_user=root
 dns_1=10.49.144.3
 dns_2=10.49.146.1
 timezone=Europe/Berlin
+controller_vip=10.49.172.200
