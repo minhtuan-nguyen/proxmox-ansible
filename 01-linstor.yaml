@@ -1,0 +1,9 @@
+---
+- name: setup linstor
+  hosts: proxmox_nodes
+  tasks:
+    - name: setup linstor
+      ansible.builtin.include_role:
+        name: 03_linstor
+    
+

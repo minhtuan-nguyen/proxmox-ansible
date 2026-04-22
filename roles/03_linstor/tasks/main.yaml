@@ -1,0 +1,45 @@
+- name: Download package signing
+  ansible.builtin.get_url:
+    url: https://packages.linbit.com/package-signing-pubkey.asc
+    dest: /tmp/package-signing-pubkey.asc
+    mode: '0644'
+- name: Add GPG key
+  ansible.builtin.shell: |
+    gpg --yes -o /etc/apt/trusted.gpg.d/linbit-keyring.gpg --dearmor \
+    /tmp/package-signing-pubkey.asc
+    PVERS=9 && echo "deb [signed-by=/etc/apt/trusted.gpg.d/linbit-keyring.gpg] \
+    https://packages.linbit.com/public/ proxmox-9 drbd-9" > /etc/apt/sources.list.d/linbit.list
+- name: install necessary linstor packages
+  apt:
+    name: 
+    - drbd-dkms
+    - drbd-utils
+    - linstor-proxmox
+    - pve-headers
+    - drbd-dkms
+    - drbd-utils
+    - linstor-controller
+    - linstor-satellite
+    - linstor-client
+    - linstor-common
+    update_cache: yes
+    state: latest
+- name: Install pve headers
+  ansible.builtin.shell: |
+    apt-mark hold linstor-controller linstor-satellite linstor-client linstor-common
+    systemctl enable linstor-satellite --now
+    apt install pve-headers-$(uname -r)
+    apt -y install --reinstall drbd-dkms drbd-utils
+- name: reboot
+  ansible.builtin.shell: reboot
+  async: 1
+  poll: 0
+  ignore_errors: yes
+- name: Wait for hosts reboot
+  ansible.builtin.wait_for_connection:
+    delay: 600
+    timeout: 900
+
+
+
+
