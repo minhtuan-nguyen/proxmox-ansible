@@ -81,7 +81,6 @@
 - name: install necessary packages
   apt:
     name: 
-    - sudo
     - python3-proxmoxer
     update_cache: yes
     cache_valid_time: 86400
