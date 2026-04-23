@@ -5,5 +5,5 @@ dir: local
 
 drbd: proxmox-storage
     content images, rootdir
-    controller {{ controller_vip }}
+    controller {{ controller_1 }} , {{ controller_2 }}
     resourcegroup proxmox-storage

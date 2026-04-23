@@ -38,47 +38,57 @@
 - name: Wait for hosts reboot
   ansible.builtin.wait_for_connection:
     delay: 600
-    timeout: 900
+    timeout: 800
 - name: Setup first controller node
   ansible.builtin.shell: |
     systemctl enable linstor-controller --now
-    linstor node create slmitstestsrv01 10.49.172.184 --node-type satellite
+    linstor node create slmitstestsrv01 10.49.172.184 --node-type combined
     linstor node create slmitstestsrv02 10.49.172.185 --node-type combined
-    linstor node create slmitstestbkp01 10.49.172.186 --node-type combined
+    linstor node create slmitstestbkp1 10.49.172.186 --node-type combined
   when: inventory_hostname == "proxmox-01" 
 - name: Create volume group - node 01
   ansible.builtin.shell: |
     vgcreate datavg /dev/sda
     lvcreate -L 2048GiB -T datavg/proxmox-storage
     lvcreate -L 2048GiB -T datavg/k8s-storage
+    lvcreate -L 4096MiB -T datavg/linstor-db
   when: inventory_hostname == "proxmox-01"
 - name: Create volume group - node 02
   ansible.builtin.shell: |
     vgcreate datavg /dev/sda
     lvcreate -L 2048GiB -T datavg/proxmox-storage
     lvcreate -L 2048GiB -T datavg/k8s-storage
+    lvcreate -L 4096MiB -T datavg/linstor-db
   when: inventory_hostname == "proxmox-02"
 - name: Create volume group - backup node
   ansible.builtin.shell: |
     vgcreate datavg /dev/sda
-    lvcreate -l 100%FREE -n backup-storage datavg
+    lvcreate -L 4096MiB -T datavg/linstor-db
+    lvcreate -L 6144GiB -T datavg/backup-storage
   when: inventory_hostname == "proxmox-03"
-- name: Create linstor storage pool on node 1 and 2
+- name: Insert/Update "Match User" configuration block in /etc/ssh/sshd_config prepending and appending a new line
+  ansible.builtin.blockinfile:
+    path: /etc/linstor/linstor.toml
+    append_newline: true
+    prepend_newline: true
+    block: |
+      [encrypt]
+      passphrase={{ master_key }}
+  
+- name: Create linstor storage pools on the nodes
   ansible.builtin.shell: |
     linstor storage-pool create lvmthin slmitstestsrv01 proxmox-storage datavg/proxmox-storage
     linstor storage-pool create lvmthin slmitstestsrv02 proxmox-storage datavg/proxmox-storage
-    linstor resource-group create proxmox-storage --storage-pool=proxmox-storage --place-count=2
+    linstor resource-group create proxmox-storage --storage-pool=proxmox-storage --place-count=2 -l DRBD,LUKS,STORAGE
     linstor storage-pool create lvmthin slmitstestsrv01 k8s-storage datavg/k8s-storage
     linstor storage-pool create lvmthin slmitstestsrv02 k8s-storage datavg/k8s-storage
-    linstor resource-group create k8s-storage --storage-pool=k8s-storage --place-count=2
+    linstor resource-group create k8s-storage --storage-pool=k8s-storage --place-count=2 -l DRBD,LUKS,STORAGE
+    linstor storage-pool create lvmthin slmitstestsrv01 linstor-db datavg/linstor-db
+    linstor storage-pool create lvmthin slmitstestsrv02 linstor-db datavg/linstor-db
+    linstor storage-pool create lvmthin slmitstestbkp1 linstor-db datavg/linstor-db
+    linstor resource-group create linstor-db --storage-pool=linstor-db --place-count=3 -l DRBD,LUKS,STORAGE
   when: inventory_hostname == "proxmox-01" 
-- name: Create sync NIC for node 1 and 2
-  ansible.builtin.shell: |
-    linstor node interface create slmitstestsrv01 sync1 192.168.1.184
-    linstor node interface create slmitstestsrv02 sync1 192.168.1.185
-    linstor node set-property slmitstestsrv01 PrefNic sync1
-    linstor node set-property slmitstestsrv02 PrefNic sync1
-  when: inventory_hostname == "proxmox-01" 
+
 - name: HA Controller
   ansible.builtin.shell: |
     linstor resource-definition create linstor_db
@@ -89,7 +99,7 @@
     linstor rd drbd-options --on-no-data-accessible=io-error linstor_db
     linstor rd drbd-options --rr-conflict=retry-connect linstor_db
     linstor volume-definition create linstor_db 4G
-    linstor resource create linstor_db --storage-pool proxmox-storage --auto-place 2
+    linstor resource create linstor_db --storage-pool linstor-db --auto-place 3
     systemctl disable --now linstor-controller
 - name: create mount file for linstor controllers
   ansible.builtin.shell: |
@@ -102,15 +112,18 @@
     What=/dev/drbd/by-res/linstor_db/0
     Where=/var/lib/linstor
     EOF
+  
+- name: copy linstor db file
+  ansible.builtin.shell: |
     mv /var/lib/linstor{,.orig}
     mkdir /var/lib/linstor
-    chattr +i /var/lib/linstor # only if on LINSTOR >= 1.14.0
+    chattr -i /var/lib/linstor
     drbdadm primary linstor_db
     mkfs.ext4 /dev/drbd/by-res/linstor_db/0
     systemctl start var-lib-linstor.mount
     cp -r /var/lib/linstor.orig/* /var/lib/linstor
     systemctl start linstor-controller
-  when: inventory_hostname in groups['linstor_controllers'] 
+  when: inventory_hostname == "proxmox-01" 
 - name: install drbd-reactor
   apt:
     name: 
@@ -121,21 +134,23 @@
   ansible.builtin.shell: |
     systemctl disable linstor-controller
     chattr +i /var/lib/linstor
-- name: create mount file for linstor controllers
+- name: create drbd-reactor file for linstor controllers
   ansible.builtin.shell: |
     cat << EOF > /etc/drbd-reactor.d/linstor_db.toml
     [[promoter]]
     id = "linstor_db"
     [promoter.resources.linstor_db]
-    start = [
-    "ocf:heartbeat:IPaddr2 service_ip cidr_netmask=24 ip= {{ controller_vip }}",
-    "var-lib-linstor.mount",
-    "linstor-controller.service"
-    ]
+    start = ["var-lib-linstor.mount","linstor-controller.service"]
+    on-drbd-demote-failure = "reboot"
+    secondary-force = true
     EOF
     systemctl restart drbd-reactor
     systemctl enable drbd-reactor
-  when: inventory_hostname in groups['linstor_controllers'] 
+  
+- name: ensure override folder exists
+  file:
+    path: /etc/systemd/system/linstor-satellite.service.d
+    state: directory
 - name: Edit satellite service
   ansible.builtin.template:
     src: override.conf.j2
@@ -146,3 +161,10 @@
 - name: restart linstor-satellite service
   ansible.builtin.shell: |
     systemctl restart linstor-satellite
+- name: Configure storage
+  ansible.builtin.template:
+    src: storage.cfg.j2
+    dest: /etc/pve/storage.cfg
+    owner: root
+    group: www-data
+    mode: '0640'

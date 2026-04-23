@@ -14,4 +14,6 @@ ansible_user=root
 dns_1=10.49.144.3
 dns_2=10.49.146.1
 timezone=Europe/Berlin
-controller_vip=10.49.172.200
+controller_1=10.49.172.184
+controller_2=10.49.172.185
+master_key="fiXGA1xKIklM7YkP"
