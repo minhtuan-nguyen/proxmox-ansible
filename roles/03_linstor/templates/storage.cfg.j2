@@ -2,8 +2,13 @@ dir: local
         path /var/lib/vz
         content iso, vztmpl,backup
 
-
 drbd: proxmox-storage
     content images, rootdir
     controller {{ controller_vip }}
     resourcegroup proxmox-storage
+
+lvmthin: backup-storage
+        thinpool backup-storage
+        vgname datavg
+        content images,rootdir
+        nodes slmitstestbkp01
