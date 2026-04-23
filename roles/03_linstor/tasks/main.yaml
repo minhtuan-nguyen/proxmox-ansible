@@ -22,6 +22,7 @@
     - linstor-satellite
     - linstor-client
     - linstor-common
+    - cryptsetup
     update_cache: yes
     state: latest
 - name: Install pve headers
@@ -30,6 +31,9 @@
     systemctl enable linstor-satellite --now
     apt install pve-headers-$(uname -r)
     apt -y install --reinstall drbd-dkms drbd-utils
+- name: enroll mok key
+  ansible.builtin.shell: |
+    yes dkms | head -n 2 | mokutil --import /var/lib/dkms/mok.pub
 - name: reboot
   ansible.builtin.shell: reboot
   async: 1
@@ -37,14 +41,13 @@
   ignore_errors: yes
 - name: Wait for hosts reboot
   ansible.builtin.wait_for_connection:
-    delay: 600
     timeout: 800
 - name: Setup first controller node
   ansible.builtin.shell: |
     systemctl enable linstor-controller --now
     linstor node create slmitstestsrv01 10.49.172.184 --node-type combined
     linstor node create slmitstestsrv02 10.49.172.185 --node-type combined
-    linstor node create slmitstestbkp1 10.49.172.186 --node-type combined
+    linstor node create slmitstestbkp01 10.49.172.186 --node-type combined
   when: inventory_hostname == "proxmox-01" 
 - name: Create volume group - node 01
   ansible.builtin.shell: |
@@ -66,7 +69,12 @@
     lvcreate -L 4096MiB -T datavg/linstor-db
     lvcreate -L 6144GiB -T datavg/backup-storage
   when: inventory_hostname == "proxmox-03"
-- name: Insert/Update "Match User" configuration block in /etc/ssh/sshd_config prepending and appending a new line
+- name: replace encrypt block
+  replace:
+    path: /etc/linstor/linstor.toml
+    regexp: '\[encrypt\]'
+    replace: ''
+- name: Update LUKS key
   ansible.builtin.blockinfile:
     path: /etc/linstor/linstor.toml
     append_newline: true
@@ -85,20 +93,20 @@
     linstor resource-group create k8s-storage --storage-pool=k8s-storage --place-count=2 -l DRBD,LUKS,STORAGE
     linstor storage-pool create lvmthin slmitstestsrv01 linstor-db datavg/linstor-db
     linstor storage-pool create lvmthin slmitstestsrv02 linstor-db datavg/linstor-db
-    linstor storage-pool create lvmthin slmitstestbkp1 linstor-db datavg/linstor-db
+    linstor storage-pool create lvmthin slmitstestbkp01 linstor-db datavg/linstor-db
     linstor resource-group create linstor-db --storage-pool=linstor-db --place-count=3 -l DRBD,LUKS,STORAGE
   when: inventory_hostname == "proxmox-01" 
 
 - name: HA Controller
   ansible.builtin.shell: |
-    linstor resource-definition create linstor_db
+    linstor resource-definition create linstor_db -l DRBD,LUKS,STORAGE --storage-pool linstor-db
     linstor rd drbd-options --auto-promote=no linstor_db
     linstor rd drbd-options --quorum=majority linstor_db
     linstor rd drbd-options --on-suspended-primary-outdated=force-secondary linstor_db
     linstor rd drbd-options --on-no-quorum=io-error linstor_db
     linstor rd drbd-options --on-no-data-accessible=io-error linstor_db
     linstor rd drbd-options --rr-conflict=retry-connect linstor_db
-    linstor volume-definition create linstor_db 4G
+    linstor volume-definition create linstor_db 2G
     linstor resource create linstor_db --storage-pool linstor-db --auto-place 3
     systemctl disable --now linstor-controller
 - name: create mount file for linstor controllers
