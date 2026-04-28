@@ -1,0 +1,13 @@
+- name: Setup first controller node
+  ansible.builtin.shell: |
+    keytool -keyalg rsa -keysize 4096 -genkey -keystore keystore.jks \
+    -storepass {{ keypass }} -alias $hostname -keypass {{ keypass }} -validity 3650 \
+    -dname "CN=slmitstest, OU=Linstor, O=NGSYS, L=Dortmund, ST=NRW, C=DE"
+    cp keystore.jks /etc/linstor
+- name: Configure storage
+  ansible.builtin.template:
+    src: storage.cfg.j2
+    dest: /etc/linstor/linstor.toml
+    owner: root
+    group: root
+    mode: '0644'    

@@ -23,17 +23,29 @@
     - linstor-client
     - linstor-common
     - cryptsetup
+    - resource-agents
     update_cache: yes
     state: latest
 - name: Install pve headers
   ansible.builtin.shell: |
     apt-mark hold linstor-controller linstor-satellite linstor-client linstor-common
     systemctl enable linstor-satellite --now
+    systemctl disable linstor-controller --now
     apt install pve-headers-$(uname -r)
     apt -y install --reinstall drbd-dkms drbd-utils
-- name: enroll mok key
+- name: enroll mok key node 1
   ansible.builtin.shell: |
     yes dkms | head -n 2 | mokutil --import /var/lib/dkms/mok.pub
+  when: inventory_hostname == "proxmox-01" 
+- name: enroll mok key node 2
+  ansible.builtin.shell: |
+    yes dkms | head -n 2 | mokutil --import /var/lib/dkms/mok.pub
+  when: inventory_hostname == "proxmox-02" 
+- name: enroll mok key node 3
+  ansible.builtin.shell: |
+    yes dkms | head -n 2 | mokutil --import /var/lib/dkms/mok.pub
+  when: inventory_hostname == "proxmox-03" 
+
 - name: reboot
   ansible.builtin.shell: reboot
   async: 1
@@ -41,6 +53,7 @@
   ignore_errors: yes
 - name: Wait for hosts reboot
   ansible.builtin.wait_for_connection:
+    delay: 60
     timeout: 800
 - name: Setup first controller node
   ansible.builtin.shell: |
@@ -48,6 +61,14 @@
     linstor node create slmitstestsrv01 10.49.172.184 --node-type combined
     linstor node create slmitstestsrv02 10.49.172.185 --node-type combined
     linstor node create slmitstestbkp01 10.49.172.186 --node-type combined
+    linstor node interface create slmitstestsrv01 sync1 192.168.1.184
+    linstor node interface create slmitstestsrv02 sync1 192.168.1.185
+    linstor node interface create slmitstestbkp01 sync1 192.168.1.186
+    linstor node set-property slmitstestsrv01 PrefNic sync1
+    linstor node set-property slmitstestsrv02 PrefNic sync1
+    linstor node set-property slmitstestbkp01 PrefNic sync1
+    
+
   when: inventory_hostname == "proxmox-01" 
 - name: Create volume group - node 01
   ansible.builtin.shell: |
@@ -81,7 +102,7 @@
     prepend_newline: true
     block: |
       [encrypt]
-      passphrase={{ master_key }}
+      passphrase="{{ master_key }}"
   
 - name: Create linstor storage pools on the nodes
   ansible.builtin.shell: |
@@ -94,12 +115,12 @@
     linstor storage-pool create lvmthin slmitstestsrv01 linstor-db datavg/linstor-db
     linstor storage-pool create lvmthin slmitstestsrv02 linstor-db datavg/linstor-db
     linstor storage-pool create lvmthin slmitstestbkp01 linstor-db datavg/linstor-db
-    linstor resource-group create linstor-db --storage-pool=linstor-db --place-count=3 -l DRBD,LUKS,STORAGE
+    linstor resource-group create linstor-db --storage-pool=linstor-db --place-count=3 -l DRBD,STORAGE
   when: inventory_hostname == "proxmox-01" 
 
 - name: HA Controller
   ansible.builtin.shell: |
-    linstor resource-definition create linstor_db -l DRBD,LUKS,STORAGE --storage-pool linstor-db
+    linstor resource-definition create linstor_db -l DRBD,STORAGE --resource-group linstor-db
     linstor rd drbd-options --auto-promote=no linstor_db
     linstor rd drbd-options --quorum=majority linstor_db
     linstor rd drbd-options --on-suspended-primary-outdated=force-secondary linstor_db
@@ -123,13 +144,17 @@
   
 - name: copy linstor db file
   ansible.builtin.shell: |
-    mv /var/lib/linstor{,.orig}
-    mkdir /var/lib/linstor
-    chattr -i /var/lib/linstor
-    drbdadm primary linstor_db
-    mkfs.ext4 /dev/drbd/by-res/linstor_db/0
-    systemctl start var-lib-linstor.mount
-    cp -r /var/lib/linstor.orig/* /var/lib/linstor
+    mv /var/lib/linstor /var/lib/linstor.orig 
+    mkdir /var/lib/linstor 
+    chattr -i /var/lib/linstor 
+    drbdadm primary linstor_db 
+    mkfs.ext4 /dev/drbd/by-res/linstor_db/0 
+    systemctl start var-lib-linstor.mount 
+    cp -r /var/lib/linstor.orig/* /var/lib/linstor 
+    
+  when: inventory_hostname == "proxmox-01" 
+- name: start linstor-controller on node 01
+  ansible.builtin.shell: |
     systemctl start linstor-controller
   when: inventory_hostname == "proxmox-01" 
 - name: install drbd-reactor
@@ -140,7 +165,7 @@
     state: latest
 - name: disable linstor-controller service
   ansible.builtin.shell: |
-    systemctl disable linstor-controller
+    systemctl disable linstor-controller 
     chattr +i /var/lib/linstor
 - name: create drbd-reactor file for linstor controllers
   ansible.builtin.shell: |
@@ -148,7 +173,7 @@
     [[promoter]]
     id = "linstor_db"
     [promoter.resources.linstor_db]
-    start = ["var-lib-linstor.mount","linstor-controller.service"]
+    start = ["ocf:heartbeat:IPaddr2 service_ip cidr_netmask=24 ip=10.49.172.200","var-lib-linstor.mount","linstor-controller.service"]
     on-drbd-demote-failure = "reboot"
     secondary-force = true
     EOF

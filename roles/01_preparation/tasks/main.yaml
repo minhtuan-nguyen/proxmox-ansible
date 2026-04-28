@@ -85,3 +85,48 @@
     update_cache: yes
     cache_valid_time: 86400
     state: latest
+
+- name: Create firewall rules at cluster level
+  community.proxmox.proxmox_firewall:
+    api_user: "{{ api_user }}"
+    api_token_id: "{{ api_token_id }}"
+    api_token_secret: "{{ api_token_secret }}"
+    api_host: "{{ api_host }}"
+    validate_certs: false
+    level: cluster
+    state: present
+    rules:
+      - type: in
+        action: ACCEPT
+        dport: 8006,8007,22,5900:5999,3128
+        proto: tcp
+        log: nolog
+        pos: 9
+        enable: true
+      - type: in
+        action: ACCEPT
+        dport: 5404:5405
+        proto: udp
+        log: nolog
+        pos: 10
+        enable: true
+      - type: in
+        action: ACCEPT
+        dport: 3366,3370:3371
+        proto: tcp
+        source: 10.49.172.0/24
+        log: nolog
+        pos: 11
+        enable: true
+      - type: in
+        action: ACCEPT
+        dport: 7000:7999
+        proto: tcp
+        source: 192.168.1.0/24
+        log: nolog
+        pos: 12
+        enable: true
+  when: inventory_hostname == "proxmox-01"
+- name: enable firewall
+  ansible.builtin.shell: systemctl enable pve-firewall.service
+
